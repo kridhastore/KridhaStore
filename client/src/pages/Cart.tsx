@@ -96,7 +96,7 @@ const Cart = () => {
               startCheckoutFromCart();
               navigate("/checkout/123");
             }}
-            className="py-3 px-8 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full shadow-md font-medium hover:opacity-90 transition"
+            className="py-3 cursor-pointer px-8 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full shadow-md font-medium hover:opacity-90 transition"
           >
             Checkout
           </button>

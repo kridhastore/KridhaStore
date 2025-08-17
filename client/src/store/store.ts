@@ -23,31 +23,51 @@ type Store = {
   clearCheckout: () => void;
 };
 
+// ✅ Utility functions for localStorage
+const loadCart = (): CartProduct[] => {
+  try {
+    const saved = localStorage.getItem("cartProducts");
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveCart = (cart: CartProduct[]) => {
+  localStorage.setItem("cartProducts", JSON.stringify(cart));
+};
+
 export const useStore = create<Store>((set) => ({
-  cartProducts: [],
+  cartProducts: loadCart(), // ✅ hydrate from localStorage
   checkoutProducts: [],
 
   addToCart: (product) =>
     set((state) => {
       const existing = state.cartProducts.find((p) => p._id === product._id);
+      let updatedCart: CartProduct[];
       if (existing) {
-        return {
-          cartProducts: state.cartProducts.map((p) =>
-            p._id === product._id ? { ...p, quantity: p.quantity + 1 } : p
-          ),
-        };
+        updatedCart = state.cartProducts.map((p) =>
+          p._id === product._id ? { ...p, quantity: p.quantity + 1 } : p
+        );
+      } else {
+        updatedCart = [...state.cartProducts, { ...product, quantity: 1 }];
       }
-      return {
-        cartProducts: [...state.cartProducts, { ...product, quantity: 1 }],
-      };
+      saveCart(updatedCart); // ✅ save to localStorage
+      return { cartProducts: updatedCart };
     }),
 
   removeFromCart: (_id) =>
-    set((state) => ({
-      cartProducts: state.cartProducts.filter((p) => p._id !== _id),
-    })),
+    set((state) => {
+      const updatedCart = state.cartProducts.filter((p) => p._id !== _id);
+      saveCart(updatedCart);
+      return { cartProducts: updatedCart };
+    }),
 
-  clearCart: () => set({ cartProducts: [] }),
+  clearCart: () =>
+    set(() => {
+      saveCart([]);
+      return { cartProducts: [] };
+    }),
 
   // checkout methods
   startCheckoutFromCart: () =>
@@ -63,13 +83,13 @@ export const useStore = create<Store>((set) => ({
   clearCheckout: () => set({ checkoutProducts: [] }),
 }));
 
+// ✅ API calls
 export const fetchProducts = async (): Promise<
   ProductInterface[] | undefined
 > => {
   try {
     const response = await axios.get(`${apiUrl}/api/products/all`);
-    const products: ProductInterface[] = response.data.products; // ✅ array of Product
-    return products;
+    return response.data.products;
   } catch (error) {
     console.error("Error fetching products:", error);
   }
@@ -80,9 +100,8 @@ export const fetchCollections = async (): Promise<
 > => {
   try {
     const response = await axios.get(`${apiUrl}/api/categories/all`);
-    const collections: CollectionInterface[] = response.data.categories; // ✅ array of Product
-    return collections;
+    return response.data.categories;
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching collections:", error);
   }
 };
