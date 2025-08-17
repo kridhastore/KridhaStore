@@ -1,5 +1,5 @@
 import ProductCard from "../components/ProductCard";
-import { fetchProducts, fetchCollections } from "../store/fetch";
+import { fetchProducts, fetchCollections } from "../store/store";
 import { useEffect, useState } from "react";
 import type { ProductInterface, CollectionInterface } from "../store/types";
 import { useParams } from "react-router-dom";
@@ -50,14 +50,7 @@ const AllProduct = () => {
       {/* Product Grid */}
       <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product) => (
-          <ProductCard
-            key={product._id}
-            _id={product._id}
-            slug={product.slug}
-            title={product.title}
-            price={product.price}
-            thumbnail={product.thumbnail}
-          />
+          <ProductCard key={product._id} product={product} />
         ))}
       </div>
     </section>

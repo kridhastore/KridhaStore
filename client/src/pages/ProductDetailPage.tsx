@@ -1,9 +1,10 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import type { ProductInterface } from "../store/types";
-import { fetchProducts } from "../store/fetch";
+import { fetchProducts } from "../store/store";
 import ProductDetailSkeleton from "../skeletons/ProductDetailSkeleton";
 import ProductCard from "../components/ProductCard";
+import { AddToCartButton, BuyNowButton } from "../components/Buttons";
 
 const ProductDetail = () => {
   const [product, setProduct] = useState<ProductInterface | null>(null);
@@ -13,7 +14,6 @@ const ProductDetail = () => {
   const [mainImage, setMainImage] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getProducts = async () => {
@@ -80,19 +80,8 @@ const ProductDetail = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-4 w-full max-w-lg sm:flex-row mt-2">
-              <button
-                onClick={() => navigate(`/checkout/${id}`)}
-                className="flex-1 cursor-pointer py-3.5 px-6 rounded-md font-semibold border border-gray-300 bg-white text-gray-900 hover:bg-gray-100 hover:shadow transition-all duration-300"
-              >
-                Buy Now
-              </button>
-
-              <button
-                onClick={() => navigate(`/checkout/${id}`)}
-                className="flex-1 cursor-pointer py-3.5 px-6 rounded-md font-semibold bg-gray-900 text-white hover:bg-black hover:shadow-md transition-all duration-300"
-              >
-                Add to Cart
-              </button>
+              <AddToCartButton product={product} />
+              <BuyNowButton product={product} />
             </div>
           </div>
 
@@ -157,14 +146,7 @@ const ProductDetail = () => {
             </h3>
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               {relatedProducts.map((prod) => (
-                <ProductCard
-                  key={prod._id}
-                  _id={prod._id}
-                  slug={prod.slug}
-                  title={prod.title}
-                  price={prod.price}
-                  thumbnail={prod.thumbnail}
-                />
+                <ProductCard key={prod._id} product={prod} />
               ))}
             </div>
           </div>

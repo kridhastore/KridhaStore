@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "./ProductCard";
-import { fetchProducts } from "../store/fetch";
+import { fetchProducts } from "../store/store";
 import type { ProductInterface } from "../store/types";
 import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
 
@@ -46,16 +46,7 @@ const NewArrivals = () => {
                   .map((_, i) => <ProductCardSkeleton key={i} />)
               : products
                   .slice(11, 15)
-                  .map((product) => (
-                    <ProductCard
-                      key={product._id}
-                      _id={product._id}
-                      slug={product.slug}
-                      title={product.title}
-                      price={product.price}
-                      thumbnail={product.thumbnail}
-                    />
-                  ))}
+                  .map((prod) => <ProductCard key={prod._id} product={prod} />)}
           </div>
         </div>
       </section>

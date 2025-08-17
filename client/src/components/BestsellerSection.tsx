@@ -1,5 +1,5 @@
 import ProductCard from "./ProductCard";
-import { fetchProducts } from "../store/fetch";
+import { fetchProducts } from "../store/store";
 import { useNavigate } from "react-router-dom";
 import type { ProductInterface } from "../store/types";
 import { useEffect, useState } from "react";
@@ -44,16 +44,7 @@ function Bestseller() {
                 .map((_, i) => <ProductCardSkeleton key={i} />)
             : products
                 .slice(15, 19)
-                .map((product) => (
-                  <ProductCard
-                    key={product._id}
-                    _id={product._id}
-                    slug={product.slug}
-                    title={product.title}
-                    price={product.price}
-                    thumbnail={product.thumbnail}
-                  />
-                ))}
+                .map((prod) => <ProductCard key={prod._id} product={prod} />)}
         </div>
       </div>
     </section>

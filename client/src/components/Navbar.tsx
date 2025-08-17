@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import { CiShoppingCart, CiUser, CiMenuBurger } from "react-icons/ci";
 import { useNavigate, NavLink } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import { useStore } from "../store/store"; // ✅ import your zustand store
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [renderSidebar, setRenderSidebar] = useState(false);
+
+  // ✅ get cart items from store
+  const cartProducts = useStore((state) => state.cartProducts);
+
+  // total items = sum of quantities
+  const totalItems = cartProducts.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
     if (showMenu) {
@@ -74,11 +81,21 @@ const Navbar = () => {
         </div>
 
         {/* Icons */}
-        <div className="flex gap-3 justify-center items-center cursor-pointer md:gap-5">
-          <CiShoppingCart
-            className="text-3xl transition-transform duration-200 hover:scale-110"
-            onClick={() => navigate("/cart")}
-          />
+        <div className="flex gap-3 justify-center items-center cursor-pointer md:gap-5 relative">
+          {/* Cart with Badge */}
+          <div className="relative">
+            <CiShoppingCart
+              className="text-3xl transition-transform duration-200 hover:scale-110"
+              onClick={() => navigate("/cart")}
+            />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+                {totalItems}
+              </span>
+            )}
+          </div>
+
+          {/* User */}
           <CiUser
             className="text-3xl transition-transform duration-200 hover:scale-110"
             onClick={() => navigate("/profile")}

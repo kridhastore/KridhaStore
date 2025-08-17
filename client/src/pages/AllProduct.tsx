@@ -1,5 +1,5 @@
 import ProductCard from "../components/ProductCard";
-import { fetchProducts } from "../store/fetch";
+import { fetchProducts } from "../store/store";
 import { useEffect, useState } from "react";
 import type { ProductInterface } from "../store/types";
 import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
@@ -41,14 +41,7 @@ const AllProduct = () => {
           : products
               .slice(14, 30)
               .map((product) => (
-                <ProductCard
-                  key={product._id}
-                  _id={product._id}
-                  slug={product.slug}
-                  title={product.title}
-                  price={product.price}
-                  thumbnail={product.thumbnail}
-                />
+                <ProductCard key={product._id} product={product} />
               ))}
       </div>
     </section>

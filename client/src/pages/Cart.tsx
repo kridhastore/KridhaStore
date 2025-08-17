@@ -1,138 +1,113 @@
-// Cart.tsx
-import { useState } from "react";
-import { FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
-
-const initialCart: CartItem[] = [
-  {
-    id: 1,
-    name: "Pendant",
-    price: 299,
-    quantity: 1,
-    image:
-      "https://www.boldpetals.in/cdn/shop/collections/FullSizeRender.jpg?v=1745181260&width=535",
-  },
-  {
-    id: 2,
-    name: "Floral Bracelet",
-    price: 199,
-    quantity: 2,
-    image:
-      "https://www.boldpetals.in/cdn/shop/collections/IMG-0310.jpg?v=1745181573&width=535",
-  },
-];
-
-const SHIPPING = 70;
-const HANDLING = 20;
-const TAX_RATE = 0.18;
+import { useStore } from "../store/store";
+import { Trash2 } from "lucide-react";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCart);
+  const {
+    cartProducts,
+    removeFromCart,
+    addToCart,
+    clearCart,
+    startCheckoutFromCart,
+  } = useStore();
 
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
+  const total = cartProducts.reduce((acc, p) => acc + p.price * p.quantity, 0);
+
+  if (cartProducts.length === 0) {
+    return (
+      <div className="p-6 flex flex-col items-center justify-center text-center">
+        <h2 className="text-xl font-semibold mb-4">No products available</h2>
+        <button
+          onClick={() => navigate("/")}
+          className="py-2.5 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-full shadow-md hover:opacity-90 transition"
+        >
+          Go Shopping
+        </button>
+      </div>
     );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
-  };
-
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + SHIPPING + HANDLING + tax;
+  }
 
   return (
-    <div className="px-4 py-8 min-h-screen bg-white">
-      <h1 className="mb-8 text-3xl font-semibold text-center text-gray-800 font-great-vibes">
-        Your Cart
-      </h1>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h1 className="text-2xl font-bold mb-8">Your Cart</h1>
 
-      {cartItems.length === 0 ? (
-        <p className="text-center text-gray-500">Your cart is empty.</p>
-      ) : (
-        <div className="mx-auto space-y-6 max-w-4xl">
-          {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-4 items-center pb-4 border-b"
-            >
+      {/* Products */}
+      <div className="flex flex-col gap-6">
+        {cartProducts.map((product) => (
+          <div
+            key={product._id}
+            className="grid grid-cols-1 sm:grid-cols-3 items-center bg-white rounded-2xl shadow-md p-5 hover:shadow-lg transition gap-6"
+          >
+            {/* Product Info */}
+            <div className="flex items-center gap-6">
               <img
-                src={item.image}
-                alt={item.name}
-                className="object-cover w-24 h-24 rounded-lg"
+                src={product.thumbnail}
+                alt={product.title}
+                className="w-28 h-28 object-cover rounded-xl shadow-sm"
               />
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {item.name}
-                </h2>
-                <p className="text-sm text-gray-600">
-                  ₹{item.price} × {item.quantity} = ₹
-                  {item.price * item.quantity}
-                </p>
-                <div className="flex gap-2 items-center mt-2">
-                  <button
-                    onClick={() => updateQuantity(item.id, -1)}
-                    className="px-2 py-1 bg-gray-200 rounded"
-                  >
-                    -
-                  </button>
-                  <span className="px-2">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.id, 1)}
-                    className="px-2 py-1 bg-gray-200 rounded"
-                  >
-                    +
-                  </button>
-                </div>
+              <div>
+                <h2 className="font-semibold text-lg">{product.title}</h2>
+                <p className="text-sm text-gray-500 mt-1">₹{product.price}</p>
               </div>
+            </div>
+
+            {/* Quantity Controls */}
+            <div className="flex items-center justify-start md:justify-center gap-3">
               <button
-                onClick={() => removeItem(item.id)}
-                className="text-red-500 hover:text-red-700"
+                onClick={() => removeFromCart(product._id)}
+                className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full text-lg font-bold hover:bg-gray-200 transition"
               >
-                <FaTrash />
+                –
+              </button>
+              <span className="min-w-[40px] text-center font-medium text-lg">
+                {product.quantity}
+              </span>
+              <button
+                onClick={() => addToCart(product)}
+                className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full text-lg font-bold hover:bg-gray-200 transition"
+              >
+                +
+              </button>
+              <button
+                onClick={() => removeFromCart(product._id)}
+                className="ml-3 text-red-500 hover:text-red-700 transition"
+              >
+                <Trash2 size={20} />
               </button>
             </div>
-          ))}
 
-          <div className="mt-8 space-y-2 text-right text-gray-700">
-            <p>Subtotal: ₹{subtotal.toFixed(2)}</p>
-            <p>Shipping: ₹{SHIPPING.toFixed(2)}</p>
-            <p>Handling Fee: ₹{HANDLING.toFixed(2)}</p>
-            <p>Tax (18%): ₹{tax.toFixed(2)}</p>
-            <h3 className="pt-2 text-xl font-semibold text-gray-800">
-              Total: ₹{total.toFixed(2)}
-            </h3>
-            <button
-              type="button"
-              onClick={() => {
-                navigate("/checkout");
-              }}
-              disabled={cartItems.length === 0}
-              className="px-6 py-3 mt-4 text-white bg-pink-600 rounded-full transition cursor-pointer hover:bg-pink-700"
-            >
-              Proceed to Checkout
-            </button>
+            {/* Total */}
+            <div className="text-right font-semibold text-gray-700 text-lg sm:ml-auto">
+              ₹{(product.price * product.quantity).toFixed(2)}
+            </div>
           </div>
+        ))}
+      </div>
+
+      {/* Summary */}
+      <div className="mt-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <h2 className="text-xl font-semibold">
+          Grand Total: ₹{total.toFixed(2)}
+        </h2>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={() => {
+              startCheckoutFromCart();
+              navigate("/checkout/123");
+            }}
+            className="py-3 px-8 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full shadow-md font-medium hover:opacity-90 transition"
+          >
+            Checkout
+          </button>
+          <button
+            onClick={clearCart}
+            className="py-3 px-8 bg-white border border-gray-300 text-gray-700 rounded-full shadow-sm font-medium hover:bg-gray-100 transition"
+          >
+            Clear Cart
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

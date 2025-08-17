@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { fetchCollections } from "../store/fetch";
+import { fetchCollections } from "../store/store";
 import { useEffect, useState } from "react";
 import CollectionCard from "./CollectionCard";
 import type { CollectionInterface } from "../store/types";
